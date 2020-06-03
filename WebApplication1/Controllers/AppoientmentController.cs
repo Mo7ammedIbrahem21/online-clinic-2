@@ -16,6 +16,30 @@ namespace WebApplication1.Controllers
         private HospitalDbContext db = new HospitalDbContext();
 
 
+         // GET: /Appointments/
+        [Authorize(Roles = "Admin")]
+        public ActionResult Index()
+        {
+            var appointments = db.Appointments.Include(a => a.Doctor).OrderByDescending(a => a.Date);
+            return View(appointments.ToList());
+        }
+
+        // GET: /Appointments/Details/5
+        [Authorize]
+        public ActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            AppointmentModel appointment = db.Appointments.Find(id);
+            if (appointment == null)
+            {
+                return View("Error");
+            }
+            return View(appointment);
+        }
+
         // GET: /Appointments/Create
         [Authorize(Roles = "Patient")]
         public ActionResult Create()
@@ -132,6 +156,51 @@ namespace WebApplication1.Controllers
             ViewBag.TimeBlockHelper = new SelectList(String.Empty);
             ViewBag.DoctorID = new SelectList(db.Doctors.Where(x => x.DisableNewAppointments == false), "ID", "Name", appointment.DoctorID);
             return View(appointment);
+        }
+
+
+         // GET: /Appointments/Delete/5
+        [Authorize]
+        public ActionResult Delete(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            AppointmentModel appointment = db.Appointments.Find(id);
+            if (appointment == null)
+            {
+                return View("Error");
+            }
+            return View(appointment);
+        }
+
+        // POST: /Appointments/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public ActionResult DeleteConfirmed(int id)
+        {
+            AppointmentModel appointment = db.Appointments.Find(id);
+            db.Appointments.Remove(appointment);
+            db.SaveChanges();
+            if (User.IsInRole("Admin"))
+                return RedirectToAction("Index");
+            else if (User.IsInRole("Doctor"))
+                return RedirectToAction("Details", new { Controller = "Doctor", Action = "UpcomingAppointments", id = User.Identity.Name });
+            else if (User.IsInRole("Patient"))
+                return RedirectToAction("Details", new { Controller = "RegisteredUsers", Action = "Details" });
+            else
+                return RedirectToAction("Index", new { Controller = "Home", Action = "Index" });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

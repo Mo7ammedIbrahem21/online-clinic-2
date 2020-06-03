@@ -3,8 +3,10 @@
     "",
     "\\WebApplication1",
     "\\WebApplication1\\App_Data",
-    "\\WebApplication1\\Controllers"
+    "\\WebApplication1\\Controllers",
+    "\\WebApplication1\\Views",
+    "\\WebApplication1\\Views\\Appoientment"
   ],
-  "SelectedNode": "\\WebApplication1\\Controllers\\HomeController.cs",
+  "SelectedNode": "\\WebApplication1\\Controllers\\AppoientmentController.cs",
   "PreviewInSolutionExplorer": false
 }
